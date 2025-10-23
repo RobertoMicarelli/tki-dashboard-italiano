@@ -1,0 +1,23 @@
+# File temporanei e di test
+*.pdf
+*.jpg
+*.jpeg
+*.png
+!images/tki-model-diagram.png
+
+# File di sistema macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# File di backup
+*~
+*.bak
+*.tmp
+
+# Log files
+*.log
