@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TKI - Thomas-Kilmann Conflict Mode Instrument</title>
     
-    <!-- Libreria per generazione PDF avanzata -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Librerie per generazione PDF avanzata -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         * {
@@ -1605,8 +1606,8 @@
             return html;
         }
 
-        // Funzione per generare PDF avanzato
-        function generateAdvancedPDF() {
+        // Funzione per generare PDF avanzato con jsPDF + html2canvas
+        async function generateAdvancedPDF() {
             const element = document.getElementById('report-content');
             
             // Mostra loading
@@ -1615,64 +1616,68 @@
             button.innerHTML = '⏳ Generando PDF...';
             button.disabled = true;
 
-            // Opzioni semplificate e più robuste
-            const opt = {
-                margin: [15, 15, 15, 15], // margini in mm
-                filename: `TKI_Report_${new Date().toISOString().split('T')[0]}.pdf`,
-                image: { type: 'jpeg', quality: 0.92 },
-                html2canvas: { 
-                    scale: 1.2,
+            try {
+                // Nascondi bottoni temporaneamente
+                const buttons = element.querySelectorAll('.button, .action-buttons');
+                const originalDisplay = [];
+                
+                buttons.forEach((btn, index) => {
+                    originalDisplay[index] = btn.style.display;
+                    btn.style.display = 'none';
+                });
+
+                // Genera canvas dall'elemento
+                const canvas = await html2canvas(element, {
+                    scale: 1.5,
                     useCORS: true,
-                    letterRendering: true,
                     allowTaint: true,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: 1200,
-                    windowHeight: 800
-                },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'portrait',
-                    compress: true
-                },
-                pagebreak: { 
-                    mode: 'css',
-                    before: '.report-section'
-                }
-            };
+                    backgroundColor: '#ffffff',
+                    width: element.scrollWidth,
+                    height: element.scrollHeight
+                });
 
-            // Usa l'elemento originale ma nascondi i bottoni temporaneamente
-            const buttons = element.querySelectorAll('.button, .action-buttons');
-            const originalDisplay = [];
-            
-            buttons.forEach((btn, index) => {
-                originalDisplay[index] = btn.style.display;
-                btn.style.display = 'none';
-            });
-
-            // Genera PDF dall'elemento originale
-            html2pdf().set(opt).from(element).save().then(() => {
                 // Ripristina bottoni
                 buttons.forEach((btn, index) => {
                     btn.style.display = originalDisplay[index];
                 });
+
+                // Crea PDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 295; // A4 height in mm
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                
+                let position = 0;
+                
+                // Aggiungi prima pagina
+                pdf.addImage(canvas, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                // Aggiungi pagine aggiuntive se necessario
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(canvas, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                // Salva PDF
+                pdf.save(`TKI_Report_${new Date().toISOString().split('T')[0]}.pdf`);
                 
                 // Ripristina bottone
                 button.innerHTML = originalText;
                 button.disabled = false;
                 console.log('PDF generato con successo');
-            }).catch((error) => {
-                // Ripristina bottoni anche in caso di errore
-                buttons.forEach((btn, index) => {
-                    btn.style.display = originalDisplay[index];
-                });
                 
+            } catch (error) {
                 console.error('Errore nella generazione PDF:', error);
                 button.innerHTML = originalText;
                 button.disabled = false;
                 alert('Errore nella generazione del PDF. Prova con la stampa normale.');
-            });
+            }
         }
 
         // Inizializzazione
