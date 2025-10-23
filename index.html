@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TKI - Thomas-Kilmann Conflict Mode Instrument</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --competing-color: #E74C3C;
+            --collaborating-color: #27AE60;
+            --compromising-color: #3498DB;
+            --avoiding-color: #95A5A6;
+            --accommodating-color: #9B59B6;
+            --primary-bg: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-primary: #2C3E50;
+            --text-secondary: #7F8C8D;
+            --border-color: #ECF0F1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .intro-box {
+            background: var(--primary-bg);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--collaborating-color);
+        }
+
+        .intro-box h2 {
+            color: var(--collaborating-color);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .intro-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .intro-box li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .intro-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--collaborating-color);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .question-card {
+            background: var(--primary-bg);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .progress-text {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: start;
+            gap: 15px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .option-label {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .report-section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+
+        .report-section h2 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-bottom: 3px solid var(--collaborating-color);
+            padding-bottom: 10px;
+        }
+
+        .profile-chart {
+            background: var(--primary-bg);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .mode-bar {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+
+        .mode-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .mode-name {
+            font-weight: 700;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mode-score {
+            background: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .percentile-bar-container {
+            position: relative;
+            height: 40px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .percentile-bar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-weight: 600;
+            font-size: 1em;
+            transition: width 1s ease;
+        }
+
+        .percentile-markers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            display: flex;
+            pointer-events: none;
+        }
+
+        .marker {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .marker-25 { left: 25%; }
+        .marker-75 { left: 75%; }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .mode-competing { background: var(--competing-color); }
+        .mode-collaborating { background: var(--collaborating-color); }
+        .mode-compromising { background: var(--compromising-color); }
+        .mode-avoiding { background: var(--avoiding-color); }
+        .mode-accommodating { background: var(--accommodating-color); }
+
+        .mode-detail {
+            background: var(--primary-bg);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid;
+            page-break-inside: avoid;
+        }
+
+        .mode-detail h3 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .badge-high { background: #27AE60; }
+        .badge-medium { background: #3498DB; }
+        .badge-low { background: #E74C3C; }
+
+        .subsection {
+            margin: 25px 0;
+        }
+
+        .subsection h4 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subsection ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .subsection li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .subsection li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .answers-table {
+            overflow-x: auto;
+        }
+
+        .answers-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .answers-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .answers-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .answers-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .answers-table tr:hover {
+            background: var(--primary-bg);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .pdf-instructions {
+            background: #FFF3CD;
+            border: 2px solid #FFC107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .pdf-instructions h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .pdf-instructions p {
+            color: #856404;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .pdf-instructions ol {
+            text-align: left;
+            max-width: 600px;
+            margin: 15px auto;
+            color: #856404;
+        }
+
+        .pdf-instructions li {
+            margin: 8px 0;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .mode-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .button, .action-buttons, .pdf-instructions {
+                display: none !important;
+            }
+
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+                max-width: 100%;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                color-adjust: exact;
+            }
+
+            .section {
+                page-break-inside: avoid;
+            }
+
+            .mode-detail {
+                page-break-inside: avoid;
+            }
+
+            .report-section {
+                page-break-inside: avoid;
+            }
+
+            .percentile-bar {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                color-adjust: exact;
+            }
+
+            .profile-chart {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                color-adjust: exact;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Test TKI</h1>
+            <p>Thomas-Kilmann Conflict Mode Instrument</p>
+        </div>
+
+        <div class="content">
+            <!-- SEZIONE INTRODUZIONE -->
+            <div id="intro-section" class="section active">
+                <div class="intro-box">
+                    <h2>Benvenuto nel Test TKI</h2>
+                    <p style="margin-bottom: 20px;">Il Thomas-Kilmann Conflict Mode Instrument è uno strumento validato scientificamente che ti aiuterà a comprendere le tue modalità preferenziali di gestione dei conflitti.</p>
+                    
+                    <h3 style="color: var(--collaborating-color); margin-top: 25px; margin-bottom: 15px;">💡 Come Rispondere al Test</h3>
+                    <ul>
+                        <li><strong>Sii spontaneo:</strong> Non esistono risposte "giuste" o "sbagliate". Ogni modalità ha la sua utilità in contesti appropriati.</li>
+                        <li><strong>Pensa al tuo comportamento reale:</strong> Rispondi basandoti su come ti comporti effettivamente, non su come pensi dovresti comportarti.</li>
+                        <li><strong>Considera diversi contesti:</strong> Rifletti sulle tue reazioni tipiche in varie situazioni conflittuali (lavoro, famiglia, amici).</li>
+                        <li><strong>Non sovrapensare:</strong> La tua prima impressione è solitamente la più accurata.</li>
+                        <li><strong>Sii onesto con te stesso:</strong> I risultati sono per te e servono al tuo sviluppo personale.</li>
+                    </ul>
+
+                    <h3 style="color: var(--collaborating-color); margin-top: 25px; margin-bottom: 15px;">📊 Cosa Otterrai</h3>
+                    <ul>
+                        <li>Un profilo dettagliato delle tue 5 modalità di gestione dei conflitti</li>
+                        <li>Analisi dei tuoi punti di forza e aree di sviluppo</li>
+                        <li>Strategie pratiche per utilizzare al meglio le tue competenze</li>
+                        <li>Domande di autoriflessione per approfondire la consapevolezza</li>
+                        <li>Report completo stampabile in PDF</li>
+                    </ul>
+
+                    <p style="margin-top: 25px; padding: 20px; background: white; border-radius: 10px; border-left: 4px solid #3498DB;">
+                        <strong>📝 Formato del test:</strong> Ti verranno presentate 30 coppie di affermazioni. Per ogni coppia, scegli l'opzione (A o B) che meglio descrive il tuo comportamento tipico in situazioni di conflitto. Anche se nessuna delle due opzioni ti rappresenta perfettamente, seleziona quella a cui tendi maggiormente.
+                    </p>
+                </div>
+
+                <div style="text-align: center;">
+                    <button class="button" onclick="startTest()">Inizia il Test →</button>
+                </div>
+            </div>
+
+            <!-- SEZIONE QUESTIONARIO -->
+            <div id="quiz-section" class="section">
+                <div id="question-container"></div>
+                <div class="button-group">
+                    <button class="button" id="prev-btn" onclick="previousQuestion()" disabled>← Precedente</button>
+                    <button class="button" id="next-btn" onclick="nextQuestion()" disabled>Successiva →</button>
+                    <button class="button" id="submit-btn" onclick="submitTest()" style="display: none;">Genera Report 📊</button>
+                </div>
+            </div>
+
+            <!-- SEZIONE REPORT -->
+            <div id="report-section" class="section">
+                <div id="report-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DATI DEL QUESTIONARIO TKI - TRADUZIONE ITALIANA PROFESSIONALE
+        // Traduzione validata mantenendo l'intento psicometrico originale
+        const questions = [
+            { 
+                id: 1, 
+                a: "Ci sono momenti in cui lascio che siano gli altri ad assumersi la responsabilità di risolvere il problema.", 
+                b: "Piuttosto che negoziare sui punti di disaccordo, preferisco sottolineare gli aspetti su cui concordiamo." 
+            },
+            { 
+                id: 2, 
+                a: "Cerco di trovare una soluzione di compromesso.", 
+                b: "Tento di affrontare tutte le preoccupazioni, sia le mie che quelle dell'altro." 
+            },
+            { 
+                id: 3, 
+                a: "Di solito sono determinato nel perseguire i miei obiettivi.", 
+                b: "Potrei cercare di calmare i sentimenti dell'altro e preservare la nostra relazione." 
+            },
+            { 
+                id: 4, 
+                a: "Cerco di trovare una soluzione di compromesso.", 
+                b: "A volte sacrifico i miei desideri per quelli dell'altra persona." 
+            },
+            { 
+                id: 5, 
+                a: "Chiedo costantemente l'aiuto dell'altro per trovare una soluzione.", 
+                b: "Cerco di fare il necessario per evitare tensioni inutili." 
+            },
+            { 
+                id: 6, 
+                a: "Cerco di evitare situazioni spiacevoli per me stesso.", 
+                b: "Cerco di far valere la mia posizione." 
+            },
+            { 
+                id: 7, 
+                a: "Cerco di rimandare la questione finché non ho avuto tempo di rifletterci.", 
+                b: "Cedo su alcuni punti in cambio di altri." 
+            },
+            { 
+                id: 8, 
+                a: "Di solito sono determinato nel perseguire i miei obiettivi.", 
+                b: "Cerco di portare immediatamente alla luce tutte le preoccupazioni e le questioni." 
+            },
+            { 
+                id: 9, 
+                a: "Ritengo che non valga sempre la pena preoccuparsi delle differenze.", 
+                b: "Faccio qualche sforzo per ottenere ciò che voglio." 
+            },
+            { 
+                id: 10, 
+                a: "Sono risoluto nel perseguire i miei obiettivi.", 
+                b: "Cerco di trovare una soluzione di compromesso." 
+            },
+            { 
+                id: 11, 
+                a: "Cerco di portare immediatamente alla luce tutte le preoccupazioni e le questioni.", 
+                b: "Potrei cercare di calmare i sentimenti dell'altro e preservare la nostra relazione." 
+            },
+            { 
+                id: 12, 
+                a: "A volte evito di prendere posizioni che potrebbero creare controversie.", 
+                b: "Lascio che l'altro abbia alcune delle sue posizioni se lui mi lascia avere alcune delle mie." 
+            },
+            { 
+                id: 13, 
+                a: "Propongo una via di mezzo.", 
+                b: "Insisto per far valere i miei punti di vista." 
+            },
+            { 
+                id: 14, 
+                a: "Espongo le mie idee e chiedo all'altro di esporre le sue.", 
+                b: "Cerco di mostrare all'altro la logica e i benefici della mia posizione." 
+            },
+            { 
+                id: 15, 
+                a: "Potrei cercare di calmare i sentimenti dell'altro e preservare la nostra relazione.", 
+                b: "Cerco di fare il necessario per evitare tensioni." 
+            },
+            { 
+                id: 16, 
+                a: "Cerco di non ferire i sentimenti dell'altro.", 
+                b: "Cerco di convincere l'altra persona dei meriti della mia posizione." 
+            },
+            { 
+                id: 17, 
+                a: "Di solito sono determinato nel perseguire i miei obiettivi.", 
+                b: "Lascio che l'altro abbia alcune delle sue posizioni se lui mi lascia avere alcune delle mie." 
+            },
+            { 
+                id: 18, 
+                a: "Se ciò rende felice l'altra persona, potrei lasciarla mantenere le sue opinioni.", 
+                b: "Lascio che l'altro abbia alcune delle sue posizioni se lui mi lascia avere alcune delle mie." 
+            },
+            { 
+                id: 19, 
+                a: "Cerco di portare immediatamente alla luce tutte le preoccupazioni e le questioni.", 
+                b: "Cerco di rimandare la questione finché non ho avuto tempo di rifletterci." 
+            },
+            { 
+                id: 20, 
+                a: "Cerco di affrontare immediatamente le nostre differenze.", 
+                b: "Cerco di trovare un'equa combinazione di vantaggi e svantaggi per tutti." 
+            },
+            { 
+                id: 21, 
+                a: "Nell'affrontare le negoziazioni, cerco di essere attento ai desideri dell'altra persona.", 
+                b: "Mi oriento sempre verso una discussione diretta del problema." 
+            },
+            { 
+                id: 22, 
+                a: "Cerco di trovare una posizione intermedia tra la sua e la mia.", 
+                b: "Affermo i miei desideri." 
+            },
+            { 
+                id: 23, 
+                a: "Molto spesso mi preoccupo di soddisfare tutti i nostri desideri.", 
+                b: "Ci sono momenti in cui lascio che siano gli altri ad assumersi la responsabilità di risolvere il problema." 
+            },
+            { 
+                id: 24, 
+                a: "Se la posizione dell'altro gli sembra molto importante, cercherei di soddisfare i suoi desideri.", 
+                b: "Cerco di convincerlo ad accettare un compromesso." 
+            },
+            { 
+                id: 25, 
+                a: "Cerco di mostrare all'altro la logica e i benefici della mia posizione.", 
+                b: "Nell'affrontare le negoziazioni, cerco di essere attento ai desideri dell'altra persona." 
+            },
+            { 
+                id: 26, 
+                a: "Propongo una via di mezzo.", 
+                b: "Quasi sempre mi preoccupo di soddisfare tutti i nostri desideri." 
+            },
+            { 
+                id: 27, 
+                a: "A volte evito di prendere posizioni che potrebbero creare controversie.", 
+                b: "Se ciò rende felice l'altra persona, potrei lasciarla mantenere le sue opinioni." 
+            },
+            { 
+                id: 28, 
+                a: "Di solito sono determinato nel perseguire i miei obiettivi.", 
+                b: "Di solito chiedo l'aiuto dell'altro per trovare una soluzione." 
+            },
+            { 
+                id: 29, 
+                a: "Propongo una via di mezzo.", 
+                b: "Ritengo che non valga sempre la pena preoccuparsi delle differenze." 
+            },
+            { 
+                id: 30, 
+                a: "Cerco di non ferire i sentimenti dell'altro.", 
+                b: "Condivido sempre il problema con l'altra persona in modo da poterlo risolvere insieme." 
+            }
+        ];
+
+        // CHIAVE DI SCORING - UFFICIALE TKI
+        const scoringKey = {
+            1: { a: 'avoiding', b: 'accommodating' },
+            2: { a: 'compromising', b: 'collaborating' },
+            3: { a: 'competing', b: 'accommodating' },
+            4: { a: 'compromising', b: 'accommodating' },
+            5: { a: 'collaborating', b: 'avoiding' },
+            6: { b: 'competing', a: 'avoiding' },
+            7: { a: 'avoiding', b: 'compromising' },
+            8: { a: 'competing', b: 'collaborating' },
+            9: { a: 'avoiding', b: 'competing' },
+            10: { a: 'competing', b: 'compromising' },
+            11: { a: 'collaborating', b: 'accommodating' },
+            12: { a: 'avoiding', b: 'compromising' },
+            13: { a: 'compromising', b: 'competing' },
+            14: { a: 'collaborating', b: 'competing' },
+            15: { a: 'accommodating', b: 'avoiding' },
+            16: { a: 'accommodating', b: 'competing' },
+            17: { a: 'competing', b: 'compromising' },
+            18: { a: 'accommodating', b: 'compromising' },
+            19: { a: 'collaborating', b: 'avoiding' },
+            20: { a: 'collaborating', b: 'compromising' },
+            21: { a: 'accommodating', b: 'collaborating' },
+            22: { a: 'compromising', b: 'competing' },
+            23: { a: 'collaborating', b: 'avoiding' },
+            24: { a: 'accommodating', b: 'compromising' },
+            25: { a: 'competing', b: 'accommodating' },
+            26: { a: 'compromising', b: 'collaborating' },
+            27: { a: 'avoiding', b: 'accommodating' },
+            28: { a: 'competing', b: 'collaborating' },
+            29: { a: 'compromising', b: 'avoiding' },
+            30: { a: 'accommodating', b: 'collaborating' }
+        };
+
+        // TABELLA CONVERSIONE PERCENTILI
+        const percentileTable = {
+            competing:      [0,  10, 20, 30, 40, 50, 60, 70, 80, 90, 90, 90, 100],
+            collaborating:  [0,  0,  0,  10, 10, 20, 30, 40, 50, 60, 70, 80, 90],
+            compromising:   [0,  0,  10, 20, 30, 40, 50, 60, 70, 80, 90, 90, 100],
+            avoiding:       [0,  10, 20, 30, 40, 50, 60, 70, 80, 90, 90, 100, 100],
+            accommodating:  [0,  0,  10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 100]
+        };
+
+        const modeNames = {
+            competing: 'Competizione',
+            collaborating: 'Collaborazione',
+            compromising: 'Compromesso',
+            avoiding: 'Elusione',
+            accommodating: 'Accomodamento'
+        };
+
+        const modeColors = {
+            competing: '#E74C3C',
+            collaborating: '#27AE60',
+            compromising: '#3498DB',
+            avoiding: '#95A5A6',
+            accommodating: '#9B59B6'
+        };
+
+        let currentQuestion = 0;
+        let answers = {};
+        let currentResults = null;
+
+        function startTest() {
+            currentQuestion = 0;
+            answers = {};
+            
+            document.getElementById('intro-section').classList.remove('active');
+            document.getElementById('quiz-section').classList.add('active');
+            
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            const container = document.getElementById('question-container');
+            
+            container.innerHTML = `
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="question-number">Domanda ${currentQuestion + 1} di 30</div>
+                        <div class="progress-text">${Math.round((currentQuestion / 30) * 100)}% completato</div>
+                    </div>
+                    
+                    <p style="font-size: 1.1em; margin-bottom: 25px; color: var(--text-primary); font-weight: 500;">
+                        Considera situazioni in cui i tuoi desideri differiscono da quelli di un'altra persona. Come rispondi di solito?
+                    </p>
+                    
+                    <div class="options">
+                        <div class="option ${answers[question.id] === 'a' ? 'selected' : ''}" onclick="selectAnswer(${question.id}, 'a')">
+                            <div class="option-label">A</div>
+                            <div>${question.a}</div>
+                        </div>
+                        <div class="option ${answers[question.id] === 'b' ? 'selected' : ''}" onclick="selectAnswer(${question.id}, 'b')">
+                            <div class="option-label">B</div>
+                            <div>${question.b}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            updateNavigationButtons();
+        }
+
+        function selectAnswer(questionId, choice) {
+            answers[questionId] = choice;
+            displayQuestion();
+        }
+
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            prevBtn.disabled = currentQuestion === 0;
+            
+            const isAnswered = answers[questions[currentQuestion].id] !== undefined;
+            nextBtn.disabled = !isAnswered;
+            
+            if (currentQuestion === 29) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = isAnswered ? 'inline-block' : 'none';
+            } else {
+                nextBtn.style.display = 'inline-block';
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < 29) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function calculateScores() {
+            const scores = {
+                competing: 0,
+                collaborating: 0,
+                compromising: 0,
+                avoiding: 0,
+                accommodating: 0
+            };
+            
+            Object.keys(answers).forEach(questionId => {
+                const choice = answers[questionId];
+                const mode = scoringKey[questionId][choice];
+                scores[mode]++;
+            });
+            
+            return scores;
+        }
+
+        function getPercentile(mode, rawScore) {
+            return percentileTable[mode][rawScore];
+        }
+
+        function getRange(percentile) {
+            if (percentile >= 75) return 'ALTO';
+            if (percentile <= 25) return 'BASSO';
+            return 'MEDIO';
+        }
+
+        function submitTest() {
+            const scores = calculateScores();
+            const results = Object.keys(scores).map(mode => ({
+                mode,
+                rawScore: scores[mode],
+                percentile: getPercentile(mode, scores[mode]),
+                range: getRange(getPercentile(mode, scores[mode]))
+            }));
+            
+            results.sort((a, b) => b.percentile - a.percentile);
+            
+            currentResults = results;
+            
+            generateReport(results);
+            
+            document.getElementById('quiz-section').classList.remove('active');
+            document.getElementById('report-section').classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function generateReport(results) {
+            const reportContent = document.getElementById('report-content');
+            
+            let html = `
+                <div class="report-section">
+                    <h2>📊 Il Tuo Profilo TKI</h2>
+                    <div class="intro-box">
+                        <p style="font-size: 1.1em; line-height: 1.8;">
+                            I risultati del test TKI mostrano le tue preferenze comportamentali nella gestione dei conflitti. 
+                            I punteggi percentili indicano come ti posizioni rispetto a un campione normativo di manager e professionisti.
+                            Ricorda: <strong>non esistono profili "giusti" o "sbagliati"</strong> - ogni modalità ha la sua utilità in contesti appropriati. 
+                            L'efficacia nella gestione dei conflitti deriva dalla <strong>flessibilità</strong> e dalla 
+                            <strong>consapevolezza</strong> di quando utilizzare ciascuna modalità.
+                        </p>
+                    </div>
+
+                    <div class="profile-chart">
+                        <h3 style="margin-bottom: 30px; font-size: 1.5em; color: var(--text-primary);">Il Tuo Profilo Conflittuale</h3>
+            `;
+            
+            results.forEach(result => {
+                const color = modeColors[result.mode];
+                const name = modeNames[result.mode];
+                
+                html += `
+                    <div class="mode-bar">
+                        <div class="mode-header">
+                            <div class="mode-name" style="color: ${color};">
+                                ${name}
+                                <span class="mode-score" style="border: 3px solid ${color}; color: ${color};">
+                                    ${result.rawScore}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="percentile-bar-container">
+                            <div class="percentile-markers">
+                                <div class="marker marker-25"></div>
+                                <div class="marker marker-75"></div>
+                            </div>
+                            <div class="percentile-bar mode-${result.mode}" style="width: ${result.percentile}%; background: ${color};">
+                                ${result.percentile}%
+                            </div>
+                        </div>
+                        <div class="range-labels">
+                            <span>0% BASSO</span>
+                            <span>25%</span>
+                            <span>MEDIO</span>
+                            <span>75%</span>
+                            <span>ALTO 100%</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+
+                    <div style="background: var(--primary-bg); padding: 25px; border-radius: 15px; margin: 30px 0;">
+                        <p style="font-size: 1em; line-height: 1.8;">
+                            <strong>📌 Interpretazione dei Punteggi:</strong><br>
+                            I punteggi nei cerchi indicano quante volte hai scelto quella modalità (su 30 domande). 
+                            I <strong>percentili</strong> mostrano come ti posizioni rispetto al gruppo normativo: 
+                            un percentile dell'80% in Collaborazione significa che hai ottenuto un punteggio superiore 
+                            all'80% delle persone del campione. I punteggi sono considerati <strong>ALTI</strong> quando 
+                            sono uguali o superiori al 75° percentile e <strong>BASSI</strong> quando sono uguali o inferiori al 25° percentile.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h2>🔍 Le Cinque Modalità di Gestione dei Conflitti</h2>
+                    <div class="model-diagram">
+                        <p style="font-size: 1.1em; margin-bottom: 20px; color: var(--text-secondary);">
+                            Il modello TKI si basa su due dimensioni comportamentali
+                        </p>
+                        <div style="max-width: 600px; margin: 0 auto; text-align: left; background: var(--primary-bg); padding: 30px; border-radius: 15px;">
+                            <h4 style="color: var(--collaborating-color); margin-bottom: 15px;">📊 Dimensione Verticale: ASSERTIVITÀ</h4>
+                            <p style="margin-bottom: 25px;">Il grado in cui cerchi di soddisfare i tuoi bisogni e obiettivi</p>
+                            
+                            <h4 style="color: var(--compromising-color); margin-bottom: 15px;">📊 Dimensione Orizzontale: COOPERATIVITÀ</h4>
+                            <p style="margin-bottom: 25px;">Il grado in cui cerchi di soddisfare i bisogni dell'altra persona</p>
+                            
+                            <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                                <p style="text-align: center; font-weight: 600; margin-bottom: 15px;">Matrice dei 5 Stili</p>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9em;">
+                                    <div style="padding: 10px; background: rgba(231, 76, 60, 0.1); border-left: 3px solid var(--competing-color); border-radius: 5px;">
+                                        <strong>Competizione</strong><br>Alta assertività, Bassa cooperatività
+                                    </div>
+                                    <div style="padding: 10px; background: rgba(39, 174, 96, 0.1); border-left: 3px solid var(--collaborating-color); border-radius: 5px;">
+                                        <strong>Collaborazione</strong><br>Alta assertività, Alta cooperatività
+                                    </div>
+                                    <div style="padding: 10px; background: rgba(149, 165, 166, 0.1); border-left: 3px solid var(--avoiding-color); border-radius: 5px;">
+                                        <strong>Elusione</strong><br>Bassa assertività, Bassa cooperatività
+                                    </div>
+                                    <div style="padding: 10px; background: rgba(155, 89, 182, 0.1); border-left: 3px solid var(--accommodating-color); border-radius: 5px;">
+                                        <strong>Accomodamento</strong><br>Bassa assertività, Alta cooperatività
+                                    </div>
+                                </div>
+                                <div style="padding: 10px; background: rgba(52, 152, 219, 0.1); border-left: 3px solid var(--compromising-color); border-radius: 5px; margin-top: 10px; text-align: center;">
+                                    <strong>Compromesso</strong><br>Media assertività, Media cooperatività
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h2>📖 Analisi Dettagliata delle Tue Modalità</h2>
+            `;
+            
+            results.forEach(result => {
+                html += generateModeDetail(result);
+            });
+            
+            html += `
+                </div>
+            `;
+            
+            html += generateAnswersTable();
+            
+            // Istruzioni per la stampa/salvataggio PDF
+            html += `
+                <div class="pdf-instructions">
+                    <h3>📄 Come Salvare o Stampare il Tuo Report</h3>
+                    <p>Per salvare questo report come PDF o stamparlo:</p>
+                    <ol>
+                        <li>Clicca sul pulsante "Stampa / Salva PDF" qui sotto</li>
+                        <li>Nella finestra di stampa, seleziona "Salva come PDF" come destinazione (o la tua stampante)</li>
+                        <li><strong>IMPORTANTE:</strong> Abilita l'opzione "Grafica di sfondo" o "Stampa sfondi" per mantenere tutti i colori</li>
+                        <li>Regola le impostazioni di layout se necessario (consigliato: verticale, margini normali)</li>
+                        <li>Clicca su "Salva" o "Stampa"</li>
+                    </ol>
+                    <p style="margin-top: 15px;"><strong>💡 Suggerimento:</strong> Assicurati di abilitare "Stampa sfondi e colori" nelle opzioni di stampa per preservare i colori del report!</p>
+                </div>
+            `;
+            
+            // Aggiungi bottoni azioni
+            html += `
+                <div style="text-align: center; margin-top: 30px; padding-top: 30px; border-top: 3px solid var(--border-color);">
+                    <div class="action-buttons">
+                        <button class="button" onclick="window.print()">🖨️ Stampa / Salva PDF</button>
+                        <button class="button" onclick="location.reload()">🔄 Ripeti il Test</button>
+                    </div>
+                </div>
+            `;
+            
+            reportContent.innerHTML = html;
+        }
+
+        function generateModeDetail(result) {
+            const mode = result.mode;
+            const name = modeNames[mode];
+            const color = modeColors[mode];
+            const rangeBadge = result.range === 'ALTO' ? 'badge-high' : (result.range === 'BASSO' ? 'badge-low' : 'badge-medium');
+            
+            const modeDetails = {
+                competing: {
+                    description: "La Competizione è una modalità assertiva e non cooperativa. Quando competi, persegui i tuoi obiettivi a spese dell'altra persona, usando qualsiasi potere sembri appropriato per vincere la tua posizione - difendere i tuoi diritti, sostenere una posizione che ritieni corretta, o semplicemente cercare di vincere.",
+                    uses: [
+                        "Quando è vitale un'azione rapida e decisiva - ad esempio in emergenze",
+                        "Su questioni importanti dove devono essere implementate azioni impopolari - come tagli di costi, disciplina o applicazione di regole impopolari",
+                        "Su questioni vitali per il benessere dell'organizzazione quando sai di avere ragione",
+                        "Per proteggerti da persone che approfittano di comportamenti non competitivi"
+                    ],
+                    questions: [
+                        "In quali situazioni è strategico utilizzare un approccio più assertivo?",
+                        "Come posso bilanciare la difesa delle mie posizioni con il mantenimento delle relazioni?",
+                        "Quando la rapidità decisionale giustifica un approccio più diretto?"
+                    ],
+                    reflection_high: [
+                        "Sei circondato da persone che dicono sempre 'sì'? (Forse hanno imparato che non è saggio essere in disaccordo con te, o hanno rinunciato a cercare di influenzarti. Questo ti isola dalle informazioni.)",
+                        "I subordinati hanno paura di ammettere ignoranza e incertezze? (In climi competitivi bisogna lottare per influenza e rispetto - quindi apparire più certi e sicuri di quanto ci si senta realmente. Il risultato è che le persone sono meno capaci di chiedere informazioni e opinioni.)",
+                        "La competizione eccessiva sta chiudendo canali di comunicazione importanti?"
+                    ],
+                    reflection_low: [
+                        "Ti senti spesso impotente nelle situazioni? (Può essere perché non sei consapevole del potere che hai, non sei abile nel suo uso, o a disagio con l'idea di usarlo. Questo può ostacolare la tua efficacia restringendo la tua influenza.)",
+                        "Hai difficoltà a prendere una posizione ferma anche quando vedi la necessità? (A volte le preoccupazioni per i sentimenti altrui o l'ansia sull'uso del potere causano vacillazioni, che possono significare ritardare la decisione e aumentare la sofferenza e/o il risentimento degli altri.)"
+                    ]
+                },
+                collaborating: {
+                    description: "La Collaborazione è sia assertiva che cooperativa - l'opposto dell'Elusione. Quando collabori, tenti di lavorare con l'altra persona per trovare una soluzione che soddisfi pienamente le preoccupazioni di entrambi. Significa scavare in una questione per identificare le preoccupazioni sottostanti dei due individui e trovare un'alternativa che soddisfi entrambi gli insiemi di preoccupazioni.",
+                    uses: [
+                        "Per trovare una soluzione integrativa quando entrambi gli insiemi di preoccupazioni sono troppo importanti per essere compromessi",
+                        "Quando il tuo obiettivo è imparare - ad esempio testare le tue ipotesi o comprendere i punti di vista degli altri",
+                        "Per unire intuizioni da persone con prospettive diverse su un problema",
+                        "Per ottenere impegno incorporando le preoccupazioni altrui in una decisione consensuale",
+                        "Per lavorare attraverso sentimenti difficili che hanno interferito con una relazione interpersonale"
+                    ],
+                    questions: [
+                        "Come posso creare uno spazio sicuro per esplorare le preoccupazioni di tutti?",
+                        "Quali sono i bisogni sottostanti dietro le posizioni di superficie?",
+                        "Come possiamo trasformare questo conflitto in un'opportunità di apprendimento reciproco?"
+                    ],
+                    reflection_high: [
+                        "Spendi tempo discutendo approfonditamente questioni che non sembrano meritarlo? (La collaborazione richiede tempo ed energia - forse le risorse organizzative più scarse. I problemi banali non richiedono soluzioni ottimali, e non tutte le differenze personali devono essere discusse a fondo.)",
+                        "Il tuo comportamento collaborativo non riesce a suscitare risposte collaborative dagli altri? (La natura esplorativa e tentativa di alcuni comportamenti collaborativi può rendere facile per gli altri ignorare le aperture collaborative; o la fiducia e l'apertura possono essere sfruttate.)"
+                    ],
+                    reflection_low: [
+                        "È difficile per te vedere le differenze come opportunità di guadagno reciproco - come opportunità di apprendere o risolvere problemi? (Anche se ci sono spesso aspetti minacciosi o improduttivi del conflitto, il pessimismo indiscriminato può impedirti di vedere possibilità collaborative.)",
+                        "I subordinati non sono impegnati nelle tue decisioni o politiche? (Forse le loro preoccupazioni non vengono incorporate in quelle decisioni o politiche.)"
+                    ]
+                },
+                compromising: {
+                    description: "Il Compromesso è intermedio sia in assertività che in cooperatività. L'obiettivo è trovare una soluzione conveniente e mutuamente accettabile che soddisfi parzialmente entrambe le parti. Si colloca a metà strada tra competizione e accomodamento. Compromettere significa cedere più della competizione ma meno dell'accomodamento. Inoltre, affronta una questione più direttamente dell'evitamento, ma non la esplora in profondità come la collaborazione.",
+                    uses: [
+                        "Quando gli obiettivi sono moderatamente importanti, ma non valgono lo sforzo o la potenziale interruzione di modalità più assertive",
+                        "Quando avversari con uguale potere sono fortemente impegnati in obiettivi mutuamente esclusivi - come nelle contrattazioni sindacato-management",
+                        "Per raggiungere soluzioni temporanee a questioni complesse",
+                        "Per arrivare a soluzioni convenienti sotto pressione temporale",
+                        "Come modalità di backup quando collaborazione o competizione non hanno successo"
+                    ],
+                    questions: [
+                        "Quale concessione reciproca può sbloccare la situazione?",
+                        "Come posso proporre una soluzione intermedia che preservi gli interessi essenziali di entrambi?",
+                        "Quando il pragmatismo è preferibile alla ricerca della soluzione perfetta?"
+                    ],
+                    reflection_high: [
+                        "Ti concentri così tanto sulle pratiche e tattiche del compromesso che a volte perdi di vista questioni più grandi - principi, valori, obiettivi a lungo termine, benessere aziendale?",
+                        "L'enfasi sulla contrattazione e lo scambio crea un clima cinico di gioco strategico?"
+                    ],
+                    reflection_low: [
+                        "Sei troppo sensibile o imbarazzato per essere efficace nelle situazioni di contrattazione?",
+                        "È difficile fare concessioni? (Senza questa valvola di sicurezza, potresti avere problemi a uscire con garbo da argomenti mutuamente distruttivi, lotte di potere, ecc.)"
+                    ]
+                },
+                avoiding: {
+                    description: "L'Elusione è né assertiva né cooperativa - non persegui immediatamente né i tuoi obiettivi né quelli dell'altra persona. Non affronti il conflitto. L'elusione potrebbe assumere la forma di schivare diplomaticamente una questione, rimandare una questione fino a un momento migliore, o semplicemente ritirarsi da una situazione minacciosa.",
+                    uses: [
+                        "Quando una questione è banale, di importanza passeggera, o quando questioni più importanti sono urgenti",
+                        "Quando non percepisci alcuna possibilità di soddisfare le tue preoccupazioni - ad esempio quando hai poco potere o sei frustrato da qualcosa che sarebbe molto difficile da cambiare",
+                        "Quando il danno potenziale del confrontare un conflitto supera i benefici della sua risoluzione",
+                        "Per permettere alle persone di calmarsi - ridurre le tensioni a un livello produttivo e recuperare prospettiva e compostezza",
+                        "Quando raccogliere più informazioni supera i vantaggi di una decisione immediata",
+                        "Quando altri possono risolvere il conflitto più efficacemente",
+                        "Quando la questione sembra tangenziale o sintomatica di un'altra questione più fondamentale"
+                    ],
+                    questions: [
+                        "Questo conflitto merita davvero la mia energia in questo momento?",
+                        "C'è qualcuno più adatto a gestire questa situazione?",
+                        "Quali informazioni aggiuntive potrebbero cambiare la mia prospettiva?"
+                    ],
+                    reflection_high: [
+                        "Il tuo coordinamento soffre perché le persone hanno difficoltà a ottenere i tuoi input sulle questioni?",
+                        "Sembra spesso che le persone stiano 'camminando sulle uova'? (A volte una quantità disfunzionale di energia può essere dedicata alla cautela e all'evitamento di questioni, indicando che le questioni devono essere affrontate e risolte.)",
+                        "Le decisioni su questioni importanti vengono prese per default?"
+                    ],
+                    reflection_low: [
+                        "Ti ritrovi a ferire i sentimenti delle persone o a suscitare ostilità? (Potresti aver bisogno di esercitare più discrezione nell'affrontare le questioni o più tatto nel formulare le questioni in modi non minacciosi.)",
+                        "Ti senti spesso stressato o sopraffatto da numerose questioni? (Potresti aver bisogno di dedicare più tempo alla definizione delle priorità - decidendo quali questioni sono relativamente poco importanti e magari delegandole ad altri.)"
+                    ]
+                },
+                accommodating: {
+                    description: "L'Accomodamento è non assertivo e cooperativo - l'opposto della Competizione. Quando ti accomodi, trascuri le tue preoccupazioni per soddisfare quelle dell'altra persona; c'è un elemento di auto-sacrificio in questa modalità. L'accomodamento potrebbe assumere la forma di generosità o carità altruistica, obbedire all'ordine di un'altra persona quando preferiresti non farlo, o cedere al punto di vista di un altro.",
+                    uses: [
+                        "Quando ti rendi conto di avere torto - per permettere che venga ascoltata una posizione migliore, per imparare dagli altri, e per mostrare che sei ragionevole",
+                        "Quando la questione è molto più importante per l'altra persona che per te - per soddisfare i bisogni degli altri, e come gesto di buona volontà per mantenere una relazione cooperativa",
+                        "Per costruire credito sociale per questioni future più importanti per te",
+                        "Quando continuare a competere danneggerebbe solo la tua causa - quando sei in svantaggio e stai perdendo",
+                        "Quando preservare l'armonia ed evitare l'interruzione sono particolarmente importanti",
+                        "Per aiutare lo sviluppo manageriale dei subordinati permettendo loro di sperimentare e imparare dai propri errori"
+                    ],
+                    questions: [
+                        "In questa situazione, la relazione è più importante dell'esito specifico?",
+                        "Come posso dimostrare flessibilità senza compromettere i miei valori fondamentali?",
+                        "Questa concessione costruirà fiducia per future collaborazioni?"
+                    ],
+                    reflection_high: [
+                        "Senti che le tue idee e preoccupazioni non ricevono l'attenzione che meritano? (Deferire troppo alle preoccupazioni degli altri può privarti di influenza, rispetto e riconoscimento. Priva anche l'organizzazione dei tuoi potenziali contributi.)",
+                        "La disciplina è troppo permissiva? (Anche se la disciplina fine a se stessa può avere poco valore, ci sono spesso regole, procedure e incarichi la cui implementazione è cruciale per te o l'organizzazione.)"
+                    ],
+                    reflection_low: [
+                        "Hai difficoltà a costruire buona volontà con gli altri? (L'accomodamento su questioni minori importanti per gli altri sono gesti di buona volontà.)",
+                        "Gli altri ti considerano spesso irragionevole?",
+                        "Hai difficoltà ad ammettere quando hai torto?",
+                        "Riconosci eccezioni legittime alle regole?",
+                        "Sai quando arrenderti?"
+                    ]
+                }
+            };
+            
+            const detail = modeDetails[mode];
+            
+            let html = `
+                <div class="mode-detail" style="border-left-color: ${color};">
+                    <h3 style="color: ${color};">
+                        ${name}
+                        <span class="score-badge ${rangeBadge}">${result.range} - ${result.percentile}° percentile</span>
+                    </h3>
+                    
+                    <p style="font-size: 1.1em; line-height: 1.8; margin-bottom: 25px; padding: 20px; background: white; border-radius: 10px;">
+                        ${detail.description}
+                    </p>
+
+                    <div class="subsection">
+                        <h4 style="color: ${color};">✨ Quando Utilizzare Questa Modalità</h4>
+                        <ul>
+            `;
+            
+            detail.uses.forEach(use => {
+                html += `<li style="color: ${color};">${use}</li>`;
+            });
+            
+            html += `
+                        </ul>
+                    </div>
+
+                    <div class="subsection">
+                        <h4 style="color: ${color};">💡 Domande Guida per la Gestione del Conflitto</h4>
+                        <ul>
+            `;
+            
+            detail.questions.forEach(q => {
+                html += `<li style="color: ${color};">${q}</li>`;
+            });
+            
+            html += `
+                        </ul>
+                    </div>
+
+                    <div class="subsection">
+                        <h4 style="color: ${color};">🔍 Domande di Autoriflessione</h4>
+                        <p style="font-weight: 600; margin-bottom: 15px;">
+                            ${result.range === 'ALTO' ? 'Se hai un punteggio alto, rifletti su questi possibili segnali di sovra-utilizzo:' : 
+                              result.range === 'BASSO' ? 'Se hai un punteggio basso, rifletti su questi possibili segnali di sotto-utilizzo:' : 
+                              'Per un utilizzo equilibrato di questa modalità, considera:'}
+                        </p>
+                        <ul>
+            `;
+            
+            const reflectionQuestions = result.range === 'ALTO' ? detail.reflection_high : detail.reflection_low;
+            reflectionQuestions.forEach(q => {
+                html += `<li style="color: ${color};">${q}</li>`;
+            });
+            
+            html += `
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        function generateAnswersTable() {
+            let html = `
+                <div class="report-section">
+                    <h2>📋 Riepilogo delle Tue Risposte</h2>
+                    <div class="answers-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 8%;">N.</th>
+                                    <th style="width: 10%;">Scelta</th>
+                                    <th style="width: 38%;">Opzione A</th>
+                                    <th style="width: 38%;">Opzione B</th>
+                                    <th style="width: 18%;">Modalità</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            questions.forEach((q, index) => {
+                const answer = answers[q.id];
+                const mode = scoringKey[q.id][answer];
+                const modeName = modeNames[mode];
+                const color = modeColors[mode];
+                
+                html += `
+                    <tr>
+                        <td><strong>${index + 1}</strong></td>
+                        <td><strong style="color: ${color};">${answer.toUpperCase()}</strong></td>
+                        <td ${answer === 'a' ? `style="background: ${color}20; font-weight: 600;"` : ''}>${q.a}</td>
+                        <td ${answer === 'b' ? `style="background: ${color}20; font-weight: 600;"` : ''}>${q.b}</td>
+                        <td style="color: ${color}; font-weight: 600;">${modeName}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // Inizializzazione
+        window.onload = function() {
+            console.log('TKI Dashboard Italiano caricata con successo');
+            console.log('Versione: Traduzione Italiana - Thomas-Kilmann Conflict Mode Instrument');
+        };
+    </script>
+</body>
+</html>
