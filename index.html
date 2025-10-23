@@ -704,6 +704,15 @@
                 border-bottom: none !important;
             }
 
+            /* Stile per il diagramma TKI */
+            .model-diagram img {
+                max-width: 100% !important;
+                height: auto !important;
+                border-radius: 5px !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+                page-break-inside: avoid !important;
+            }
+
             /* Forza i colori per la stampa */
             * {
                 -webkit-print-color-adjust: exact !important;
@@ -1232,6 +1241,18 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Diagramma TKI -->
+                        <div style="text-align: center; margin: 40px 0; padding: 30px; background: var(--primary-bg); border-radius: 15px;">
+                            <h3 style="color: var(--text-primary); margin-bottom: 20px; font-size: 1.4em;">📊 Modello TKI - Rappresentazione Visuale</h3>
+                            <img src="images/tki-model-diagram.png" 
+                                 alt="Modello TKI - Le 5 modalità di gestione dei conflitti" 
+                                 style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none; padding: 20px; background: #f8f9fa; border-radius: 10px; color: #666;">
+                                <p>⚠️ Immagine del modello TKI non disponibile</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1273,6 +1294,17 @@
                         <button class="button" onclick="window.print()">🖨️ Stampa / Salva PDF</button>
                         <button class="button" onclick="location.reload()">🔄 Ripeti il Test</button>
                     </div>
+                </div>
+            `;
+            
+            // Aggiungi nota di credito
+            html += `
+                <div style="text-align: center; margin-top: 40px; padding: 20px; background: var(--primary-bg); border-radius: 10px; border-top: 2px solid var(--border-color);">
+                    <p style="color: var(--text-secondary); font-size: 0.9em; line-height: 1.6;">
+                        <strong>Versione adattata online dal Dr. Roberto Micarelli</strong><br>
+                        <span style="color: var(--collaborating-color);">Connectance ETS & TopForGrowth</span><br>
+                        <em>Basato sul Thomas-Kilmann Conflict Mode Instrument (TKI)</em>
+                    </p>
                 </div>
             `;
             
