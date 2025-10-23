@@ -492,6 +492,58 @@
             }
         }
 
+        /* CSS specifico per generazione PDF con html2pdf.js */
+        .pdf-optimized {
+            width: 210mm !important;
+            max-width: 210mm !important;
+            margin: 0 !important;
+            padding: 15mm !important;
+            font-size: 12px !important;
+            line-height: 1.4 !important;
+            background: white !important;
+        }
+        
+        .pdf-optimized .report-section {
+            margin-bottom: 20px !important;
+            page-break-inside: avoid !important;
+        }
+        
+        .pdf-optimized .mode-detail {
+            margin-bottom: 15px !important;
+            page-break-inside: avoid !important;
+        }
+        
+        .pdf-optimized .mode-bar {
+            margin-bottom: 10px !important;
+            page-break-inside: avoid !important;
+        }
+        
+        .pdf-optimized .subsection {
+            margin: 10px 0 !important;
+            page-break-inside: avoid !important;
+        }
+        
+        .pdf-optimized .intro-box {
+            margin-bottom: 15px !important;
+            page-break-inside: avoid !important;
+        }
+        
+        .pdf-optimized .profile-chart {
+            margin: 15px 0 !important;
+            page-break-inside: avoid !important;
+        }
+        
+        .pdf-optimized .answers-table {
+            margin: 15px 0 !important;
+            page-break-inside: avoid !important;
+        }
+        
+        .pdf-optimized img {
+            max-width: 100% !important;
+            height: auto !important;
+            page-break-inside: avoid !important;
+        }
+
         @media print {
             @page {
                 size: A4;
@@ -1553,26 +1605,41 @@
         // Funzione per generare PDF avanzato
         function generateAdvancedPDF() {
             const element = document.getElementById('report-content');
+            
+            // Clona l'elemento per evitare modifiche al DOM originale
+            const clonedElement = element.cloneNode(true);
+            
+            // Applica classe CSS ottimizzata per PDF
+            clonedElement.classList.add('pdf-optimized');
+            
+            // Rimuovi elementi problematici
+            const buttons = clonedElement.querySelectorAll('.button, .action-buttons');
+            buttons.forEach(btn => btn.remove());
+            
             const opt = {
-                margin: [0.5, 0.5, 0.5, 0.5],
+                margin: [10, 10, 10, 10], // margini in mm
                 filename: `TKI_Report_${new Date().toISOString().split('T')[0]}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
+                image: { type: 'jpeg', quality: 0.85 },
                 html2canvas: { 
-                    scale: 2,
+                    scale: 1.5,
                     useCORS: true,
                     letterRendering: true,
-                    allowTaint: true
+                    allowTaint: true,
+                    height: window.innerHeight,
+                    width: window.innerWidth
                 },
                 jsPDF: { 
-                    unit: 'in', 
+                    unit: 'mm', 
                     format: 'a4', 
                     orientation: 'portrait',
-                    compress: true
+                    compress: true,
+                    putOnlyUsedFonts: true
                 },
                 pagebreak: { 
-                    mode: ['avoid-all', 'css', 'legacy'],
+                    mode: 'avoid-all',
                     before: '.report-section',
-                    after: '.mode-detail'
+                    after: '.mode-detail',
+                    avoid: ['.mode-bar', '.subsection', '.intro-box']
                 }
             };
 
@@ -1582,12 +1649,26 @@
             button.innerHTML = '⏳ Generando PDF...';
             button.disabled = true;
 
-            html2pdf().set(opt).from(element).save().then(() => {
+            // Aggiungi temporaneamente al DOM per il rendering
+            clonedElement.style.position = 'absolute';
+            clonedElement.style.left = '-9999px';
+            clonedElement.style.top = '0';
+            document.body.appendChild(clonedElement);
+            
+            html2pdf().set(opt).from(clonedElement).save().then(() => {
+                // Rimuovi elemento temporaneo
+                document.body.removeChild(clonedElement);
+                
                 // Ripristina bottone
                 button.innerHTML = originalText;
                 button.disabled = false;
                 console.log('PDF generato con successo');
             }).catch((error) => {
+                // Rimuovi elemento temporaneo anche in caso di errore
+                if (document.body.contains(clonedElement)) {
+                    document.body.removeChild(clonedElement);
+                }
+                
                 console.error('Errore nella generazione PDF:', error);
                 button.innerHTML = originalText;
                 button.disabled = false;
