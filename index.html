@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TKI - Thomas-Kilmann Conflict Mode Instrument</title>
     
-    <!-- Librerie per generazione PDF avanzata -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Librerie rimosse - usiamo solo stampa browser ottimizzata -->
     
     <style>
         * {
@@ -493,57 +491,7 @@
             }
         }
 
-        /* CSS specifico per generazione PDF con html2pdf.js */
-        .pdf-optimized {
-            width: 210mm !important;
-            max-width: 210mm !important;
-            margin: 0 !important;
-            padding: 15mm !important;
-            font-size: 12px !important;
-            line-height: 1.4 !important;
-            background: white !important;
-        }
-        
-        .pdf-optimized .report-section {
-            margin-bottom: 20px !important;
-            page-break-inside: avoid !important;
-        }
-        
-        .pdf-optimized .mode-detail {
-            margin-bottom: 15px !important;
-            page-break-inside: avoid !important;
-        }
-        
-        .pdf-optimized .mode-bar {
-            margin-bottom: 10px !important;
-            page-break-inside: avoid !important;
-        }
-        
-        .pdf-optimized .subsection {
-            margin: 10px 0 !important;
-            page-break-inside: avoid !important;
-        }
-        
-        .pdf-optimized .intro-box {
-            margin-bottom: 15px !important;
-            page-break-inside: avoid !important;
-        }
-        
-        .pdf-optimized .profile-chart {
-            margin: 15px 0 !important;
-            page-break-inside: avoid !important;
-        }
-        
-        .pdf-optimized .answers-table {
-            margin: 15px 0 !important;
-            page-break-inside: avoid !important;
-        }
-        
-        .pdf-optimized img {
-            max-width: 100% !important;
-            height: auto !important;
-            page-break-inside: avoid !important;
-        }
+        /* CSS PDF rimosso - usiamo solo stampa browser ottimizzata */
 
         @media print {
             @page {
@@ -1345,12 +1293,11 @@
             html += `
                 <div style="text-align: center; margin-top: 30px; padding-top: 30px; border-top: 3px solid var(--border-color);">
                     <div class="action-buttons">
-                        <button class="button" onclick="generateAdvancedPDF()">📄 PDF Avanzato</button>
-                        <button class="button" onclick="window.print()">🖨️ Stampa Browser</button>
+                        <button class="button" onclick="window.print()">📄 Stampa / Salva PDF</button>
                         <button class="button" onclick="location.reload()">🔄 Ripeti il Test</button>
                     </div>
                     <p style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9em;">
-                        💡 <strong>Consiglio:</strong> Se il PDF Avanzato non funziona, usa "Stampa Browser" e salva come PDF
+                        💡 <strong>Consiglio:</strong> Usa "Stampa / Salva PDF" e seleziona "Salva come PDF" nella finestra di stampa
                     </p>
                 </div>
             `;
@@ -1608,89 +1555,7 @@
             return html;
         }
 
-        // Funzione per generare PDF avanzato con jsPDF + html2canvas
-        async function generateAdvancedPDF() {
-            const element = document.getElementById('report-content');
-            
-            // Mostra loading
-            const button = event.target;
-            const originalText = button.innerHTML;
-            button.innerHTML = '⏳ Generando PDF...';
-            button.disabled = true;
-
-            try {
-                // Nascondi bottoni temporaneamente
-                const buttons = element.querySelectorAll('.button, .action-buttons');
-                const originalDisplay = [];
-                
-                buttons.forEach((btn, index) => {
-                    originalDisplay[index] = btn.style.display;
-                    btn.style.display = 'none';
-                });
-
-                // Genera canvas dall'elemento
-                const canvas = await html2canvas(element, {
-                    scale: 1.2,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff',
-                    width: element.scrollWidth,
-                    height: element.scrollHeight,
-                    scrollX: 0,
-                    scrollY: 0
-                });
-
-                // Ripristina bottoni
-                buttons.forEach((btn, index) => {
-                    btn.style.display = originalDisplay[index];
-                });
-
-                // Crea PDF
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                
-                // Dimensioni A4 con margini
-                const pageWidth = 210; // A4 width in mm
-                const pageHeight = 297; // A4 height in mm
-                const margin = 10; // margini in mm
-                const contentWidth = pageWidth - (2 * margin);
-                const contentHeight = pageHeight - (2 * margin);
-                
-                // Calcola dimensioni immagine mantenendo proporzioni
-                const imgWidth = contentWidth;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                
-                let yPosition = margin;
-                let remainingHeight = imgHeight;
-                
-                // Aggiungi prima pagina
-                pdf.addImage(canvas, 'JPEG', margin, yPosition, imgWidth, Math.min(imgHeight, contentHeight));
-                remainingHeight -= contentHeight;
-                
-                // Aggiungi pagine aggiuntive se necessario
-                while (remainingHeight > 0) {
-                    pdf.addPage();
-                    yPosition = margin - (imgHeight - remainingHeight);
-                    const currentPageHeight = Math.min(remainingHeight, contentHeight);
-                    pdf.addImage(canvas, 'JPEG', margin, yPosition, imgWidth, imgHeight);
-                    remainingHeight -= contentHeight;
-                }
-                
-                // Salva PDF
-                pdf.save(`TKI_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-                
-                // Ripristina bottone
-                button.innerHTML = originalText;
-                button.disabled = false;
-                console.log('PDF generato con successo');
-                
-            } catch (error) {
-                console.error('Errore nella generazione PDF:', error);
-                button.innerHTML = originalText;
-                button.disabled = false;
-                alert('Errore nella generazione del PDF. Prova con la stampa normale.');
-            }
-        }
+        // Funzione PDF avanzata rimossa - usiamo solo stampa browser ottimizzata
 
         // Inizializzazione
         window.onload = function() {
