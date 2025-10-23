@@ -1342,10 +1342,13 @@
             html += `
                 <div style="text-align: center; margin-top: 30px; padding-top: 30px; border-top: 3px solid var(--border-color);">
                     <div class="action-buttons">
-                        <button class="button" onclick="generateAdvancedPDF()">📄 Genera PDF Avanzato</button>
-                        <button class="button" onclick="window.print()">🖨️ Stampa / Salva PDF</button>
+                        <button class="button" onclick="generateAdvancedPDF()">📄 PDF Avanzato</button>
+                        <button class="button" onclick="window.print()">🖨️ Stampa Browser</button>
                         <button class="button" onclick="location.reload()">🔄 Ripeti il Test</button>
                     </div>
+                    <p style="margin-top: 15px; color: var(--text-secondary); font-size: 0.9em;">
+                        💡 <strong>Consiglio:</strong> Se il PDF Avanzato non funziona, usa "Stampa Browser" e salva come PDF
+                    </p>
                 </div>
             `;
             
@@ -1606,68 +1609,64 @@
         function generateAdvancedPDF() {
             const element = document.getElementById('report-content');
             
-            // Clona l'elemento per evitare modifiche al DOM originale
-            const clonedElement = element.cloneNode(true);
-            
-            // Applica classe CSS ottimizzata per PDF
-            clonedElement.classList.add('pdf-optimized');
-            
-            // Rimuovi elementi problematici
-            const buttons = clonedElement.querySelectorAll('.button, .action-buttons');
-            buttons.forEach(btn => btn.remove());
-            
-            const opt = {
-                margin: [10, 10, 10, 10], // margini in mm
-                filename: `TKI_Report_${new Date().toISOString().split('T')[0]}.pdf`,
-                image: { type: 'jpeg', quality: 0.85 },
-                html2canvas: { 
-                    scale: 1.5,
-                    useCORS: true,
-                    letterRendering: true,
-                    allowTaint: true,
-                    height: window.innerHeight,
-                    width: window.innerWidth
-                },
-                jsPDF: { 
-                    unit: 'mm', 
-                    format: 'a4', 
-                    orientation: 'portrait',
-                    compress: true,
-                    putOnlyUsedFonts: true
-                },
-                pagebreak: { 
-                    mode: 'avoid-all',
-                    before: '.report-section',
-                    after: '.mode-detail',
-                    avoid: ['.mode-bar', '.subsection', '.intro-box']
-                }
-            };
-
             // Mostra loading
             const button = event.target;
             const originalText = button.innerHTML;
             button.innerHTML = '⏳ Generando PDF...';
             button.disabled = true;
 
-            // Aggiungi temporaneamente al DOM per il rendering
-            clonedElement.style.position = 'absolute';
-            clonedElement.style.left = '-9999px';
-            clonedElement.style.top = '0';
-            document.body.appendChild(clonedElement);
+            // Opzioni semplificate e più robuste
+            const opt = {
+                margin: [15, 15, 15, 15], // margini in mm
+                filename: `TKI_Report_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.92 },
+                html2canvas: { 
+                    scale: 1.2,
+                    useCORS: true,
+                    letterRendering: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: 1200,
+                    windowHeight: 800
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait',
+                    compress: true
+                },
+                pagebreak: { 
+                    mode: 'css',
+                    before: '.report-section'
+                }
+            };
+
+            // Usa l'elemento originale ma nascondi i bottoni temporaneamente
+            const buttons = element.querySelectorAll('.button, .action-buttons');
+            const originalDisplay = [];
             
-            html2pdf().set(opt).from(clonedElement).save().then(() => {
-                // Rimuovi elemento temporaneo
-                document.body.removeChild(clonedElement);
+            buttons.forEach((btn, index) => {
+                originalDisplay[index] = btn.style.display;
+                btn.style.display = 'none';
+            });
+
+            // Genera PDF dall'elemento originale
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Ripristina bottoni
+                buttons.forEach((btn, index) => {
+                    btn.style.display = originalDisplay[index];
+                });
                 
                 // Ripristina bottone
                 button.innerHTML = originalText;
                 button.disabled = false;
                 console.log('PDF generato con successo');
             }).catch((error) => {
-                // Rimuovi elemento temporaneo anche in caso di errore
-                if (document.body.contains(clonedElement)) {
-                    document.body.removeChild(clonedElement);
-                }
+                // Ripristina bottoni anche in caso di errore
+                buttons.forEach((btn, index) => {
+                    btn.style.display = originalDisplay[index];
+                });
                 
                 console.error('Errore nella generazione PDF:', error);
                 button.innerHTML = originalText;
