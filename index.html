@@ -1628,12 +1628,14 @@
 
                 // Genera canvas dall'elemento
                 const canvas = await html2canvas(element, {
-                    scale: 1.5,
+                    scale: 1.2,
                     useCORS: true,
                     allowTaint: true,
                     backgroundColor: '#ffffff',
                     width: element.scrollWidth,
-                    height: element.scrollHeight
+                    height: element.scrollHeight,
+                    scrollX: 0,
+                    scrollY: 0
                 });
 
                 // Ripristina bottoni
@@ -1645,23 +1647,31 @@
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 
-                const imgWidth = 210; // A4 width in mm
-                const pageHeight = 295; // A4 height in mm
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                let heightLeft = imgHeight;
+                // Dimensioni A4 con margini
+                const pageWidth = 210; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                const margin = 10; // margini in mm
+                const contentWidth = pageWidth - (2 * margin);
+                const contentHeight = pageHeight - (2 * margin);
                 
-                let position = 0;
+                // Calcola dimensioni immagine mantenendo proporzioni
+                const imgWidth = contentWidth;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                let yPosition = margin;
+                let remainingHeight = imgHeight;
                 
                 // Aggiungi prima pagina
-                pdf.addImage(canvas, 'JPEG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+                pdf.addImage(canvas, 'JPEG', margin, yPosition, imgWidth, Math.min(imgHeight, contentHeight));
+                remainingHeight -= contentHeight;
                 
                 // Aggiungi pagine aggiuntive se necessario
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
+                while (remainingHeight > 0) {
                     pdf.addPage();
-                    pdf.addImage(canvas, 'JPEG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
+                    yPosition = margin - (imgHeight - remainingHeight);
+                    const currentPageHeight = Math.min(remainingHeight, contentHeight);
+                    pdf.addImage(canvas, 'JPEG', margin, yPosition, imgWidth, imgHeight);
+                    remainingHeight -= contentHeight;
                 }
                 
                 // Salva PDF
