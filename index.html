@@ -491,7 +491,22 @@
             }
         }
 
-        /* CSS PDF rimosso - usiamo solo stampa browser ottimizzata */
+        /* CSS per page break nel PDF */
+        .page-break-before {
+            page-break-before: always;
+        }
+        
+        .page-break-after {
+            page-break-after: always;
+        }
+        
+        .page-break-inside-avoid {
+            page-break-inside: avoid;
+        }
+        
+        .no-page-break {
+            page-break-inside: avoid;
+        }
 
         @media print {
             @page {
@@ -1145,7 +1160,7 @@
             const reportContent = document.getElementById('report-content');
             
             let html = `
-                <div class="report-section">
+                <div class="report-section no-page-break">
                     <h2>📊 Il Tuo Profilo TKI</h2>
                     <div class="intro-box">
                         <p style="font-size: 1.1em; line-height: 1.8;">
@@ -1210,7 +1225,7 @@
                     </div>
                 </div>
 
-                <div class="report-section">
+                <div class="report-section no-page-break">
                     <h2>🔍 Le Cinque Modalità di Gestione dei Conflitti</h2>
                     <div class="model-diagram">
                         <p style="font-size: 1.1em; margin-bottom: 20px; color: var(--text-secondary);">
@@ -1259,11 +1274,15 @@
                     </div>
                 </div>
 
-                <div class="report-section">
+                <div class="report-section page-break-before">
                     <h2>📖 Analisi Dettagliata delle Tue Modalità</h2>
             `;
             
-            results.forEach(result => {
+            results.forEach((result, index) => {
+                // Aggiungi page break prima di ogni modalità tranne la prima
+                if (index > 0) {
+                    html += `<div class="page-break-before"></div>`;
+                }
                 html += generateModeDetail(result);
             });
             
@@ -1271,6 +1290,7 @@
                 </div>
             `;
             
+            html += `<div class="page-break-before"></div>`;
             html += generateAnswersTable();
             
             // Istruzioni per la stampa/salvataggio PDF
@@ -1450,7 +1470,7 @@
             const detail = modeDetails[mode];
             
             let html = `
-                <div class="mode-detail" style="border-left-color: ${color};">
+                <div class="mode-detail no-page-break" style="border-left-color: ${color};">
                     <h3 style="color: ${color};">
                         ${name}
                         <span class="score-badge ${rangeBadge}">${result.range} - ${result.percentile}° percentile</span>
@@ -1512,7 +1532,7 @@
 
         function generateAnswersTable() {
             let html = `
-                <div class="report-section">
+                <div class="report-section no-page-break">
                     <h2>📋 Riepilogo delle Tue Risposte</h2>
                     <div class="answers-table">
                         <table>
