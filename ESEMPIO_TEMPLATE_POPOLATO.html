@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esempio Template TKI Popolato</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.15;
+            margin: 0;
+            padding: 2.5cm;
+            background: white;
+            color: #333;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        .cover-page {
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logo-placeholder {
+            width: 200px;
+            height: 100px;
+            border: 2px solid #3498DB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            background: #F8F9FA;
+            color: #2C3E50;
+            font-weight: bold;
+        }
+        
+        h1 {
+            font-size: 24pt;
+            font-weight: bold;
+            color: #2C3E50;
+            margin: 20px 0;
+        }
+        
+        h2 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #2C3E50;
+            margin: 30px 0 20px 0;
+        }
+        
+        h3 {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #34495E;
+            margin: 20px 0 15px 0;
+        }
+        
+        .intro-box {
+            background: #F8F9FA;
+            border-left: 4px solid #3498DB;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .profile-chart {
+            background: white;
+            border: 1px solid #E0E0E0;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .mode-bar {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: #FAFAFA;
+            border-radius: 5px;
+        }
+        
+        .mode-name {
+            width: 120px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .mode-score {
+            width: 30px;
+            text-align: center;
+            margin-right: 15px;
+        }
+        
+        .mode-bar-visual {
+            flex: 1;
+            height: 20px;
+            background: #E0E0E0;
+            border-radius: 10px;
+            position: relative;
+            margin-right: 15px;
+        }
+        
+        .mode-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .mode-percentile {
+            width: 60px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .mode-range {
+            width: 80px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .competing { background: #E74C3C; }
+        .collaborating { background: #27AE60; }
+        .compromising { background: #3498DB; }
+        .avoiding { background: #95A5A6; }
+        .accommodating { background: #9B59B6; }
+        
+        .model-matrix {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .matrix-cell {
+            padding: 20px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .matrix-cell.competing { border-color: #E74C3C; background: rgba(231, 76, 60, 0.1); }
+        .matrix-cell.collaborating { border-color: #27AE60; background: rgba(39, 174, 96, 0.1); }
+        .matrix-cell.compromising { border-color: #3498DB; background: rgba(52, 152, 219, 0.1); }
+        .matrix-cell.avoiding { border-color: #95A5A6; background: rgba(149, 165, 166, 0.1); }
+        .matrix-cell.accommodating { border-color: #9B59B6; background: rgba(155, 89, 182, 0.1); }
+        
+        .mode-detail {
+            border-left: 4px solid #3498DB;
+            padding: 20px;
+            margin: 20px 0;
+            background: #FAFAFA;
+        }
+        
+        .mode-detail.competing { border-left-color: #E74C3C; }
+        .mode-detail.collaborating { border-left-color: #27AE60; }
+        .mode-detail.compromising { border-left-color: #3498DB; }
+        .mode-detail.avoiding { border-left-color: #95A5A6; }
+        .mode-detail.accommodating { border-left-color: #9B59B6; }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 10pt;
+            margin-left: 15px;
+        }
+        
+        .badge-high { background: #E74C3C; }
+        .badge-medium { background: #F39C12; }
+        .badge-low { background: #95A5A6; }
+        
+        .subsection {
+            margin: 20px 0;
+        }
+        
+        .subsection h4 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin: 15px 0 10px 0;
+        }
+        
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .answers-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .answers-table th,
+        .answers-table td {
+            border: 1px solid #E0E0E0;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .answers-table th {
+            background: #F8F9FA;
+            font-weight: bold;
+        }
+        
+        .answers-table tr:nth-child(even) {
+            background: #FAFAFA;
+        }
+        
+        .credits {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: #F8F9FA;
+            border-radius: 8px;
+            font-size: 10pt;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<!-- PAGINA 1: COVER PAGE -->
+<div class="cover-page">
+    <div class="logo-placeholder">
+        LOGO AZIENDALE
+    </div>
+    
+    <h1>REPORT TKI AZIENDALE</h1>
+    <h2>Thomas-Kilmann Conflict Mode Instrument</h2>
+    
+    <div style="margin: 40px 0;">
+        <h3>Mario Rossi</h3>
+        <p><strong>Data di generazione:</strong> 23 Gennaio 2025</p>
+        <p><strong>Codice Report:</strong> TKI-2025-01-23-001</p>
+    </div>
+    
+    <div style="margin-top: 60px;">
+        <p><strong>Versione Aziendale - 2025</strong></p>
+        <p>Dr. Roberto Micarelli<br>
+        Connectance ETS & TopForGrowth</p>
+    </div>
+</div>
+
+<!-- PAGINA 2: PROFILO TKI + MODELLO -->
+<div class="page-break">
+    <h2>📊 Il Tuo Profilo TKI</h2>
+    
+    <div class="intro-box">
+        <p>I risultati del test TKI mostrano le tue preferenze comportamentali nella gestione dei conflitti. I punteggi percentili indicano come ti posizioni rispetto a un campione normativo di manager e professionisti. Ricorda: <strong>non esistono profili "giusti" o "sbagliati"</strong> - ogni modalità ha la sua utilità in contesti appropriati. L'efficacia nella gestione dei conflitti deriva dalla <strong>flessibilità</strong> e dalla <strong>consapevolezza</strong> di quando utilizzare ciascuna modalità.</p>
+    </div>
+    
+    <h3>Il Tuo Profilo Conflittuale</h3>
+    
+    <div class="profile-chart">
+        <div class="mode-bar">
+            <div class="mode-name competing">Competizione</div>
+            <div class="mode-score">7</div>
+            <div class="mode-bar-visual">
+                <div class="mode-bar-fill competing" style="width: 70%;"></div>
+            </div>
+            <div class="mode-percentile">70%</div>
+            <div class="mode-range badge-medium">MEDIO</div>
+        </div>
+        
+        <div class="mode-bar">
+            <div class="mode-name collaborating">Collaborazione</div>
+            <div class="mode-score">8</div>
+            <div class="mode-bar-visual">
+                <div class="mode-bar-fill collaborating" style="width: 75%;"></div>
+            </div>
+            <div class="mode-percentile">75%</div>
+            <div class="mode-range badge-medium">MEDIO</div>
+        </div>
+        
+        <div class="mode-bar">
+            <div class="mode-name compromising">Compromesso</div>
+            <div class="mode-score">4</div>
+            <div class="mode-bar-visual">
+                <div class="mode-bar-fill compromising" style="width: 25%;"></div>
+            </div>
+            <div class="mode-percentile">25%</div>
+            <div class="mode-range badge-low">BASSO</div>
+        </div>
+        
+        <div class="mode-bar">
+            <div class="mode-name avoiding">Elusione</div>
+            <div class="mode-score">6</div>
+            <div class="mode-bar-visual">
+                <div class="mode-bar-fill avoiding" style="width: 50%;"></div>
+            </div>
+            <div class="mode-percentile">50%</div>
+            <div class="mode-range badge-medium">MEDIO</div>
+        </div>
+        
+        <div class="mode-bar">
+            <div class="mode-name accommodating">Accomodamento</div>
+            <div class="mode-score">5</div>
+            <div class="mode-bar-visual">
+                <div class="mode-bar-fill accommodating" style="width: 30%;"></div>
+            </div>
+            <div class="mode-percentile">30%</div>
+            <div class="mode-range badge-low">BASSO</div>
+        </div>
+    </div>
+    
+    <div class="intro-box">
+        <h4>Interpretazione dei Punteggi:</h4>
+        <p>I numeri nei cerchi indicano quante volte hai scelto una specifica modalità (su 30 domande). I <strong>percentili</strong> mostrano come ti posizioni rispetto a un gruppo normativo. Ad esempio, un 80° percentile in Collaborazione significa che hai un punteggio più alto dell'80% del campione. I punteggi sono considerati <strong>ALTI</strong> quando sono uguali o superiori al 75° percentile e <strong>BASSI</strong> quando sono uguali o inferiori al 25° percentile.</p>
+    </div>
+    
+    <h2>🔍 Le Cinque Modalità di Gestione dei Conflitti</h2>
+    
+    <p>Il modello TKI si basa su due dimensioni comportamentali:</p>
+    
+    <div class="model-matrix">
+        <div class="matrix-cell competing">
+            <h4>Competizione</h4>
+            <p>Alta assertività, Bassa cooperatività</p>
+        </div>
+        <div class="matrix-cell collaborating">
+            <h4>Collaborazione</h4>
+            <p>Alta assertività, Alta cooperatività</p>
+        </div>
+        <div class="matrix-cell avoiding">
+            <h4>Elusione</h4>
+            <p>Bassa assertività, Bassa cooperatività</p>
+        </div>
+        <div class="matrix-cell accommodating">
+            <h4>Accomodamento</h4>
+            <p>Bassa assertività, Alta cooperatività</p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <div class="matrix-cell compromising" style="display: inline-block; width: 200px;">
+            <h4>Compromesso</h4>
+            <p>Media assertività, Media cooperatività</p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin: 40px 0;">
+        <div style="width: 400px; height: 300px; border: 2px solid #E0E0E0; display: inline-block; background: #F8F9FA; display: flex; align-items: center; justify-content: center; color: #666;">
+            [DIAGRAMMA TKI - IMMAGINE]
+        </div>
+        <p style="font-size: 10pt; color: #666; margin-top: 10px;">By Roberto Micarelli</p>
+    </div>
+</div>
+
+<!-- PAGINA 3: ANALISI DETTAGLIATA - COMPETIZIONE -->
+<div class="page-break">
+    <h2>📖 Analisi Dettagliata delle Tue Modalità</h2>
+    
+    <div class="mode-detail competing">
+        <h3>Competizione <span class="badge badge-medium">MEDIO - 70° percentile</span></h3>
+        
+        <p>La Competizione è una modalità assertiva e non cooperativa. Quando competi, persegui i tuoi obiettivi a spese dell'altra persona, usando qualsiasi potere sembri appropriato per vincere la tua posizione - difendere i tuoi diritti, sostenere una posizione che ritieni corretta, o semplicemente cercare di vincere.</p>
+        
+        <div class="subsection">
+            <h4>✨ Quando Utilizzare Questa Modalità</h4>
+            <ul>
+                <li>Quando è vitale un'azione rapida e decisiva - ad esempio in emergenze</li>
+                <li>Su questioni importanti dove devono essere implementate azioni impopolari - come tagli di costi, disciplina o applicazione di regole impopolari</li>
+                <li>Su questioni vitali per il benessere dell'organizzazione quando sai di avere ragione</li>
+                <li>Per proteggerti da persone che approfittano di comportamenti non competitivi</li>
+            </ul>
+        </div>
+        
+        <div class="subsection">
+            <h4>💡 Domande Guida per la Gestione del Conflitto</h4>
+            <ul>
+                <li>In quali situazioni è strategico utilizzare un approccio più assertivo?</li>
+                <li>Come posso bilanciare la difesa delle mie posizioni con il mantenimento delle relazioni?</li>
+                <li>Quando la rapidità decisionale giustifica un approccio più diretto?</li>
+            </ul>
+        </div>
+        
+        <div class="subsection">
+            <h4>🔍 Domande di Autoriflessione</h4>
+            <p><strong>Per un utilizzo equilibrato di questa modalità, considera:</strong></p>
+            <ul>
+                <li>Sei circondato da persone che dicono sempre 'sì'? (Forse hanno imparato che non è saggio essere in disaccordo con te, o hanno rinunciato a cercare di influenzarti. Questo ti isola dalle informazioni.)</li>
+                <li>I subordinati hanno paura di ammettere ignoranza e incertezze? (In climi competitivi bisogna lottare per influenza e rispetto - quindi apparire più certi e sicuri di quanto ci si senta realmente. Il risultato è che le persone sono meno capaci di chiedere informazioni e opinioni.)</li>
+                <li>La competizione eccessiva sta chiudendo canali di comunicazione importanti?</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- PAGINA FINALE: RIEPILOGO RISPOSTE -->
+<div class="page-break">
+    <h2>📋 Riepilogo delle Tue Risposte</h2>
+    
+    <table class="answers-table">
+        <thead>
+            <tr>
+                <th style="width: 8%;">N.</th>
+                <th style="width: 60%;">Domanda</th>
+                <th style="width: 8%;">A</th>
+                <th style="width: 8%;">B</th>
+                <th style="width: 16%;">Stile</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Preferisco delegare la gestione di questo disaccordo ai colleghi più coinvolti</td>
+                <td>✓</td>
+                <td></td>
+                <td>Evitante</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Cerco soluzioni win-win attraverso la negoziazione strutturata</td>
+                <td></td>
+                <td>✓</td>
+                <td>Collaborativo</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Punto a far approvare la mia proposta di progetto senza compromessi</td>
+                <td>✓</td>
+                <td></td>
+                <td>Competitivo</td>
+            </tr>
+            <tr>
+                <td>...</td>
+                <td>...</td>
+                <td>...</td>
+                <td>...</td>
+                <td>...</td>
+            </tr>
+            <tr>
+                <td>30</td>
+                <td>Gestisco con diplomazia le critiche per mantenere un buon clima di lavoro</td>
+                <td>✓</td>
+                <td></td>
+                <td>Accomodante</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="intro-box">
+        <h4>📄 Come Salvare o Stampare il Tuo Report</h4>
+        <ol>
+            <li><strong>Stampa Browser:</strong> Usa Ctrl+P (Cmd+P su Mac) e seleziona "Salva come PDF"</li>
+            <li><strong>Stampa Fisica:</strong> Assicurati di abilitare "Stampa sfondi e colori" nelle opzioni</li>
+            <li><strong>Condivisione:</strong> Il report è personale e confidenziale</li>
+        </ol>
+        <p><strong>💡 Suggerimento:</strong> Assicurati di abilitare "Stampa sfondi e colori" nelle opzioni di stampa per preservare i colori del report!</p>
+    </div>
+    
+    <div class="credits">
+        <p><strong>Versione adattata online dal Dr. Roberto Micarelli</strong><br>
+        (Connectance ETS & TopForGrowth)<br>
+        Basato sul Thomas-Kilmann Conflict Mode Instrument (TKI)</p>
+    </div>
+</div>
+
+</body>
+</html>
